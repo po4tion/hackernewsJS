@@ -120,79 +120,95 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 })({"src/core/router.ts":[function(require,module,exports) {
 "use strict";
 
-var __values = this && this.__values || function (o) {
-  var s = typeof Symbol === "function" && Symbol.iterator,
-      m = s && o[s],
-      i = 0;
-  if (m) return m.call(o);
-  if (o && typeof o.length === "number") return {
-    next: function next() {
-      if (o && i >= o.length) o = void 0;
-      return {
-        value: o && o[i++],
-        done: !o
-      };
-    }
-  };
-  throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
-};
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var Router = function () {
+var Router = /*#__PURE__*/function () {
   function Router() {
-    // hashchange를 사용하기 위해서는 a.href의 값 맨 앞에 #가 있어야 한다
+    var _this = this;
+
+    _classCallCheck(this, Router);
+
+    this.go = function () {
+      _this.route();
+    };
+
     window.addEventListener('hashchange', this.route.bind(this));
-    this.routeTable = [];
     this.defaultRoute = null;
+    this.routeTable = [];
   }
 
-  Router.prototype.setDefaultPage = function (page) {
-    this.defaultRoute = {
-      path: '',
-      page: page
-    };
-  };
-
-  Router.prototype.addRoutePath = function (path, page) {
-    this.routeTable.push({
-      path: path,
-      page: page
-    });
-  };
-
-  Router.prototype.route = function () {
-    var e_1, _a;
-
-    var routePath = location.hash;
-
-    if (routePath === '' && this.defaultRoute) {
-      this.defaultRoute.page.render();
-    }
-
-    try {
-      for (var _b = __values(this.routeTable), _c = _b.next(); !_c.done; _c = _b.next()) {
-        var routeInfo = _c.value;
-
-        if (routePath.indexOf(routeInfo.path) >= 0) {
-          routeInfo.page.render();
-          break;
-        }
-      }
-    } catch (e_1_1) {
-      e_1 = {
-        error: e_1_1
+  _createClass(Router, [{
+    key: "setDefaultPage",
+    value: function setDefaultPage(page) {
+      var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+      this.defaultRoute = {
+        path: '',
+        page: page,
+        params: params
       };
-    } finally {
+    }
+  }, {
+    key: "addRoutePath",
+    value: function addRoutePath(path, page) {
+      var params = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+      this.routeTable.push({
+        path: path,
+        page: page,
+        params: params
+      });
+    }
+  }, {
+    key: "route",
+    value: function route() {
+      var routePath = location.hash;
+
+      if (routePath === '' && this.defaultRoute) {
+        this.defaultRoute.page.render();
+        return;
+      }
+
+      var _iterator = _createForOfIteratorHelper(this.routeTable),
+          _step;
+
       try {
-        if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var routeInfo = _step.value;
+
+          if (routePath.indexOf(routeInfo.path) >= 0) {
+            if (routeInfo.params) {
+              var parseParams = routePath.match(routeInfo.params);
+
+              if (parseParams) {
+                routeInfo.page.render.apply(null, [parseParams[1]]);
+              }
+            } else {
+              routeInfo.page.render();
+            }
+
+            return;
+          }
+        }
+      } catch (err) {
+        _iterator.e(err);
       } finally {
-        if (e_1) throw e_1.error;
+        _iterator.f();
       }
     }
-  };
+  }]);
 
   return Router;
 }();
@@ -201,46 +217,61 @@ exports.default = Router;
 },{}],"src/core/view.ts":[function(require,module,exports) {
 "use strict";
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var View = function () {
+var View = /*#__PURE__*/function () {
   function View(containerId, template) {
-    var containerElement = document.getElementById(containerId);
+    _classCallCheck(this, View);
 
-    if (!containerElement) {
+    var conatinerElement = document.getElementById(containerId);
+
+    if (!conatinerElement) {
       throw '최상위 컨테이너가 없어 UI를 진행하지 못합니다.';
     }
 
-    this.container = containerElement;
+    this.container = conatinerElement;
     this.template = template;
     this.renderTemplate = template;
     this.htmlList = [];
   }
 
-  View.prototype.updateView = function () {
-    this.container.innerHTML = this.renderTemplate;
-    this.renderTemplate = this.template;
-  };
-
-  View.prototype.addHtml = function (htmlString) {
-    this.htmlList.push(htmlString);
-  };
-
-  View.prototype.getHtml = function () {
-    var snapshot = this.htmlList.join('');
-    this.clearHtmlList();
-    return snapshot;
-  };
-
-  View.prototype.setTemplateData = function (key, value) {
-    this.renderTemplate = this.renderTemplate.replace("{{__" + key + "__}}", value);
-  };
-
-  View.prototype.clearHtmlList = function () {
-    this.htmlList = [];
-  };
+  _createClass(View, [{
+    key: "updateView",
+    value: function updateView() {
+      this.container.innerHTML = this.renderTemplate;
+      this.renderTemplate = this.template;
+    }
+  }, {
+    key: "addHtml",
+    value: function addHtml(htmlString) {
+      this.htmlList.push(htmlString);
+    }
+  }, {
+    key: "getHtml",
+    value: function getHtml() {
+      var snapshot = this.htmlList.join('');
+      this.clearHtmlList();
+      return snapshot;
+    }
+  }, {
+    key: "setTemplateData",
+    value: function setTemplateData(key, value) {
+      this.renderTemplate = this.renderTemplate.replace("{{__".concat(key, "__}}"), value);
+    }
+  }, {
+    key: "clearHtmlList",
+    value: function clearHtmlList() {
+      this.htmlList = [];
+    }
+  }]);
 
   return View;
 }();
@@ -249,82 +280,95 @@ exports.default = View;
 },{}],"src/core/api.ts":[function(require,module,exports) {
 "use strict";
 
-var __extends = this && this.__extends || function () {
-  var _extendStatics = function extendStatics(d, b) {
-    _extendStatics = Object.setPrototypeOf || {
-      __proto__: []
-    } instanceof Array && function (d, b) {
-      d.__proto__ = b;
-    } || function (d, b) {
-      for (var p in b) {
-        if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p];
-      }
-    };
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-    return _extendStatics(d, b);
-  };
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
-  return function (d, b) {
-    if (typeof b !== "function" && b !== null) throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-    _extendStatics(d, b);
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
-    function __() {
-      this.constructor = d;
-    }
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
 
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-  };
-}();
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.NewsDetailApi = exports.NewsFeedApi = exports.Api = void 0;
 
-var Api = function () {
+var Api = /*#__PURE__*/function () {
   function Api(url) {
+    _classCallCheck(this, Api);
+
     this.ajax = new XMLHttpRequest();
     this.url = url;
   }
 
-  Api.prototype.getRequest = function () {
-    this.ajax.open('GET', this.url, false);
-    this.ajax.send();
-    return JSON.parse(this.ajax.response);
-  };
+  _createClass(Api, [{
+    key: "getRequest",
+    value: function getRequest() {
+      this.ajax.open('GET', this.url, false);
+      this.ajax.send();
+      return JSON.parse(this.ajax.response);
+    }
+  }]);
 
   return Api;
 }();
 
 exports.Api = Api;
 
-var NewsFeedApi = function (_super) {
-  __extends(NewsFeedApi, _super);
+var NewsFeedApi = /*#__PURE__*/function (_Api) {
+  _inherits(NewsFeedApi, _Api);
+
+  var _super = _createSuper(NewsFeedApi);
 
   function NewsFeedApi() {
-    return _super !== null && _super.apply(this, arguments) || this;
+    _classCallCheck(this, NewsFeedApi);
+
+    return _super.apply(this, arguments);
   }
 
-  NewsFeedApi.prototype.getData = function () {
-    return this.getRequest();
-  };
+  _createClass(NewsFeedApi, [{
+    key: "getData",
+    value: function getData() {
+      return this.getRequest();
+    }
+  }]);
 
   return NewsFeedApi;
 }(Api);
 
 exports.NewsFeedApi = NewsFeedApi;
 
-var NewsDetailApi = function (_super) {
-  __extends(NewsDetailApi, _super);
+var NewsDetailApi = /*#__PURE__*/function (_Api2) {
+  _inherits(NewsDetailApi, _Api2);
+
+  var _super2 = _createSuper(NewsDetailApi);
 
   function NewsDetailApi() {
-    return _super !== null && _super.apply(this, arguments) || this;
+    _classCallCheck(this, NewsDetailApi);
+
+    return _super2.apply(this, arguments);
   }
 
-  NewsDetailApi.prototype.getData = function () {
-    return this.getRequest();
-  };
+  _createClass(NewsDetailApi, [{
+    key: "getData",
+    value: function getData() {
+      return this.getRequest();
+    }
+  }]);
 
   return NewsDetailApi;
 }(Api);
@@ -342,33 +386,27 @@ exports.CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json';
 },{}],"src/page/news-detail-view.ts":[function(require,module,exports) {
 "use strict";
 
-var __extends = this && this.__extends || function () {
-  var _extendStatics = function extendStatics(d, b) {
-    _extendStatics = Object.setPrototypeOf || {
-      __proto__: []
-    } instanceof Array && function (d, b) {
-      d.__proto__ = b;
-    } || function (d, b) {
-      for (var p in b) {
-        if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p];
-      }
-    };
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-    return _extendStatics(d, b);
-  };
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-  return function (d, b) {
-    if (typeof b !== "function" && b !== null) throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-    _extendStatics(d, b);
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-    function __() {
-      this.constructor = d;
-    }
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-  };
-}();
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 var __importDefault = this && this.__importDefault || function (mod) {
   return mod && mod.__esModule ? mod : {
@@ -388,46 +426,60 @@ var config_1 = require("../config");
 
 var template = "\n    <div class=\"bg-gray-600 min-h-screen pb-8\">\n      <div class=\"bg-white text-xl\">\n        <div class=\"mx-auto px-4\">\n          <div class=\"flex justify-between items-center py-6\">\n            <div class=\"flex justify-start\">\n              <h1 class=\"font-extrabold\">Hacker News</h1>\n            </div>\n            <div class=\"items-center justify-end\">\n              <a href=\"#/page/{{__currentPage__}}\" class=\"text-gray-500\">\n                <i class=\"fa fa-times\"></i>\n              </a>\n            </div>\n          </div>\n        </div>\n      </div>\n\n      <div class=\"h-full border rounded-xl bg-white m-6 p-4 \">\n        <h2>{{__title__}}</h2>\n        <div class=\"text-gray-400 h-20\">\n          {{__content__}}\n        </div>\n\n        {{__comments__}}\n\n      </div>\n    </div>\n    ";
 
-var NewsDetailView = function (_super) {
-  __extends(NewsDetailView, _super);
+var NewsDetailView = /*#__PURE__*/function (_view_1$default) {
+  _inherits(NewsDetailView, _view_1$default);
 
-  function NewsDetailView(containerId) {
-    return _super.call(this, containerId, template) || this;
+  var _super = _createSuper(NewsDetailView);
+
+  function NewsDetailView(containerId, store) {
+    var _this;
+
+    _classCallCheck(this, NewsDetailView);
+
+    _this = _super.call(this, containerId, template);
+
+    _this.render = function (id) {
+      var api = new api_1.NewsDetailApi(config_1.CONTENT_URL.replace('@id', id));
+
+      var _api$getData = api.getData(),
+          title = _api$getData.title,
+          content = _api$getData.content,
+          comments = _api$getData.comments;
+
+      _this.store.makeRead(Number(id));
+
+      _this.setTemplateData('currentPage', _this.store.currentPage.toString());
+
+      _this.setTemplateData('title', title);
+
+      _this.setTemplateData('content', content);
+
+      _this.setTemplateData('comments', _this.makeComment(comments));
+
+      _this.updateView();
+    };
+
+    _this.store = store;
+    return _this;
   }
 
-  NewsDetailView.prototype.render = function () {
-    var id = location.hash.substr(7);
-    var api = new api_1.NewsDetailApi(config_1.CONTENT_URL.replace('@id', id));
-    var newsDetail = api.getData();
+  _createClass(NewsDetailView, [{
+    key: "makeComment",
+    value: function makeComment(comments) {
+      var commentString = [];
 
-    for (var i = 0; i < window.store.feeds.length; i++) {
-      if (window.store.feeds[i].id === Number(id)) {
-        window.store.feeds[i].read = true;
-        break;
+      for (var i = 0; i < comments.length; i++) {
+        var comment = comments[i];
+        this.addHtml("\n        <div style=\"padding-left: ".concat(comment.level * 40, "px;\" class=\"mt-4\">\n          <div class=\"text-gray-400\">\n            <i class=\"fa fa-sort-up mr-2\"></i>\n            <strong>").concat(comment.user, "</strong> ").concat(comment.time_ago, "\n          </div>\n          <p class=\"text-gray-700\">").concat(comment.content, "</p>\n        </div>  \n      "));
+
+        if (comment.comments.length > 0) {
+          this.addHtml(this.makeComment(comment.comments));
+        }
       }
+
+      return this.getHtml();
     }
-
-    this.setTemplateData('comments', this.makeComment(newsDetail.comments));
-    this.setTemplateData('currentPage', String(window.store.currentPage));
-    this.setTemplateData('title', newsDetail.title);
-    this.setTemplateData('content', newsDetail.content);
-    this.updateView();
-  };
-
-  NewsDetailView.prototype.makeComment = function (comments) {
-    var commentString = [];
-
-    for (var i = 0; i < comments.length; i++) {
-      var comment = comments[i];
-      this.addHtml("\n        <div style=\"padding-left: " + comment.level * 40 + "px;\" class=\"mt-4\">\n          <div class=\"text-gray-400\">\n            <i class=\"fa fa-sort-up mr-2\"></i>\n            <strong>" + comment.user + "</strong> " + comment.time_ago + "\n          </div>\n          <p class=\"text-gray-700\">" + comment.content + "</p>\n        </div>  \n      ");
-
-      if (comment.comments.length > 0) {
-        this.addHtml(this.makeComment(comment.comments));
-      }
-    }
-
-    return this.getHtml();
-  };
+  }]);
 
   return NewsDetailView;
 }(view_1.default);
@@ -436,33 +488,23 @@ exports.default = NewsDetailView;
 },{"../core/view":"src/core/view.ts","../core/api":"src/core/api.ts","../config":"src/config.ts"}],"src/page/news-feed-view.ts":[function(require,module,exports) {
 "use strict";
 
-var __extends = this && this.__extends || function () {
-  var _extendStatics = function extendStatics(d, b) {
-    _extendStatics = Object.setPrototypeOf || {
-      __proto__: []
-    } instanceof Array && function (d, b) {
-      d.__proto__ = b;
-    } || function (d, b) {
-      for (var p in b) {
-        if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p];
-      }
-    };
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-    return _extendStatics(d, b);
-  };
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-  return function (d, b) {
-    if (typeof b !== "function" && b !== null) throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
-    _extendStatics(d, b);
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-    function __() {
-      this.constructor = d;
-    }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-  };
-}();
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 var __importDefault = this && this.__importDefault || function (mod) {
   return mod && mod.__esModule ? mod : {
@@ -480,53 +522,55 @@ var api_1 = require("../core/api");
 
 var config_1 = require("../config");
 
-var template = "\n      <div class=\"bg-gray-600 min-h-screen\">\n        <div class=\"bg-white text-xl\">\n          <div class=\"mx-auto px-4\">\n            <div class=\"flex justify-between items-center py-6\">\n              <div class=\"flex justify-start\">\n                <h1 class=\"font-extrabold\">Hacker News</h1>\n              </div>\n              <div class=\"items-center justify-end\">\n                <a href=\"#/page/{{__prev_page__}}\" class=\"text-gray-500\">\n                  Previous\n                </a>\n                <a href=\"#/page/{{__next_page__}}\" class=\"text-gray-500 ml-4\">\n                  Next\n                </a>\n              </div>\n            </div> \n          </div>\n        </div>\n        <div class=\"p-4 text-2xl text-gray-700\">\n          {{__news_feed__}}        \n        </div>\n      </div>\n    ";
+var template = "\n<div class=\"bg-gray-600 min-h-screen\">\n  <div class=\"bg-white text-xl\">\n    <div class=\"mx-auto px-4\">\n      <div class=\"flex justify-between items-center py-6\">\n        <div class=\"flex justify-start\">\n          <h1 class=\"font-extrabold\">Hacker News</h1>\n        </div>\n        <div class=\"items-center justify-end\">\n          <a href=\"#/page/{{__prev_page__}}\" class=\"text-gray-500\">\n            Previous\n          </a>\n          <a href=\"#/page/{{__next_page__}}\" class=\"text-gray-500 ml-4\">\n            Next\n          </a>\n        </div>\n      </div> \n    </div>\n  </div>\n  <div class=\"p-4 text-2xl text-gray-700\">\n    {{__news_feed__}}        \n  </div>\n</div>\n";
 
-var NewsFeedView = function (_super) {
-  __extends(NewsFeedView, _super);
+var NewsFeedView = /*#__PURE__*/function (_view_1$default) {
+  _inherits(NewsFeedView, _view_1$default);
 
-  function NewsFeedView(containerId) {
-    var _this = _super.call(this, containerId, template) || this;
+  var _super = _createSuper(NewsFeedView);
 
+  function NewsFeedView(containerId, store) {
+    var _this;
+
+    _classCallCheck(this, NewsFeedView);
+
+    _this = _super.call(this, containerId, template);
+
+    _this.render = function () {
+      var page = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '1';
+      _this.store.currentPage = Number(page);
+
+      for (var i = (_this.store.currentPage - 1) * 10; i < _this.store.currentPage * 10; i++) {
+        var _this$store$getFeed = _this.store.getFeed(i),
+            id = _this$store$getFeed.id,
+            title = _this$store$getFeed.title,
+            comments_count = _this$store$getFeed.comments_count,
+            user = _this$store$getFeed.user,
+            points = _this$store$getFeed.points,
+            time_ago = _this$store$getFeed.time_ago,
+            read = _this$store$getFeed.read;
+
+        _this.addHtml("\n        <div class=\"p-6 ".concat(read ? 'bg-red-500' : 'bg-white', " mt-6 rounded-lg shadow-md transition-colors duration-500 hover:bg-green-100\">\n          <div class=\"flex\">\n            <div class=\"flex-auto\">\n              <a href=\"#/show/").concat(id, "\">").concat(title, "</a>  \n            </div>\n            <div class=\"text-center text-sm\">\n              <div class=\"w-10 text-white bg-green-300 rounded-lg px-0 py-2\">").concat(comments_count, "</div>\n            </div>\n          </div>\n          <div class=\"flex mt-3\">\n            <div class=\"grid grid-cols-3 text-sm text-gray-500\">\n              <div><i class=\"fas fa-user mr-1\"></i>").concat(user, "</div>\n              <div><i class=\"fas fa-heart mr-1\"></i>").concat(points, "</div>\n              <div><i class=\"far fa-clock mr-1\"></i>").concat(time_ago, "</div>\n            </div>  \n          </div>\n        </div>    \n      "));
+      }
+
+      _this.setTemplateData('news_feed', _this.getHtml());
+
+      _this.setTemplateData('prev_page', String(_this.store.prevPage));
+
+      _this.setTemplateData('next_page', String(_this.store.nextPage));
+
+      _this.updateView();
+    };
+
+    _this.store = store;
     _this.api = new api_1.NewsFeedApi(config_1.NEWS_URL);
-    _this.feeds = window.store.feeds;
 
-    if (_this.feeds.length === 0) {
-      _this.feeds = window.store.feeds = _this.api.getData();
-
-      _this.makeFeeds();
+    if (!_this.store.hasFeeds) {
+      _this.store.setFeeds(_this.api.getData());
     }
 
     return _this;
   }
-
-  NewsFeedView.prototype.render = function () {
-    // defaultpage일 경우 substr에 아무것도 없음
-    window.store.currentPage = Number(location.hash.substr(7) || 1);
-
-    for (var i = (window.store.currentPage - 1) * 10; i < window.store.currentPage * 10; i++) {
-      var _a = this.feeds[i],
-          id = _a.id,
-          title = _a.title,
-          comments_count = _a.comments_count,
-          user = _a.user,
-          points = _a.points,
-          time_ago = _a.time_ago,
-          read = _a.read;
-      this.addHtml("\n      <div class=\"p-6 " + (read ? 'bg-red-500' : 'bg-white') + " mt-6 rounded-lg shadow-md transition-colors duration-500 hover:bg-green-100\">\n          <div class=\"flex\">\n            <div class=\"flex-auto\">\n              <a href=\"#/show/" + id + "\">" + title + "</a>  \n            </div>\n            <div class=\"text-center text-sm\">\n              <div class=\"w-10 text-white bg-green-300 rounded-lg px-0 py-2\">" + comments_count + "</div>\n            </div>\n          </div>\n          <div class=\"flex mt-3\">\n            <div class=\"grid grid-cols-3 text-sm text-gray-500\">\n              <div><i class=\"fas fa-user mr-1\"></i>" + user + "</div>\n              <div><i class=\"fas fa-heart mr-1\"></i>" + points + "</div>\n              <div><i class=\"far fa-clock mr-1\"></i>" + time_ago + "</div>\n            </div>  \n          </div>\n        </div>    \n    ");
-    }
-
-    this.setTemplateData('news_feed', this.getHtml());
-    this.setTemplateData('prev_page', String(window.store.currentPage > 1 ? window.store.currentPage - 1 : 1));
-    this.setTemplateData('next_page', String(window.store.currentPage < 3 ? window.store.currentPage + 1 : 3));
-    this.updateView();
-  };
-
-  NewsFeedView.prototype.makeFeeds = function () {
-    for (var i = 0; i < this.feeds.length; i++) {
-      this.feeds[i].read = false;
-    }
-  };
 
   return NewsFeedView;
 }(view_1.default);
@@ -563,7 +607,93 @@ Object.defineProperty(exports, "NewsFeedView", {
     return __importDefault(news_feed_view_1).default;
   }
 });
-},{"./news-detail-view":"src/page/news-detail-view.ts","./news-feed-view":"src/page/news-feed-view.ts"}],"src/app.ts":[function(require,module,exports) {
+},{"./news-detail-view":"src/page/news-detail-view.ts","./news-feed-view":"src/page/news-feed-view.ts"}],"src/store.ts":[function(require,module,exports) {
+"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Store = void 0;
+
+var Store = /*#__PURE__*/function () {
+  function Store() {
+    _classCallCheck(this, Store);
+
+    this.feeds = [];
+    this._currentPage = 1;
+  }
+
+  _createClass(Store, [{
+    key: "currentPage",
+    get: function get() {
+      return this._currentPage;
+    },
+    set: function set(page) {
+      this._currentPage = page;
+    }
+  }, {
+    key: "nextPage",
+    get: function get() {
+      return this._currentPage + 1 < 3 ? this._currentPage + 1 : 3;
+    }
+  }, {
+    key: "prevPage",
+    get: function get() {
+      return this._currentPage > 1 ? this._currentPage - 1 : 1;
+    }
+  }, {
+    key: "numberOfFeed",
+    get: function get() {
+      return this.feeds.length;
+    }
+  }, {
+    key: "hasFeeds",
+    get: function get() {
+      return this.feeds.length > 0;
+    }
+  }, {
+    key: "getAllFeeds",
+    value: function getAllFeeds() {
+      return this.feeds;
+    }
+  }, {
+    key: "getFeed",
+    value: function getFeed(position) {
+      return this.feeds[position];
+    }
+  }, {
+    key: "setFeeds",
+    value: function setFeeds(feeds) {
+      this.feeds = feeds.map(function (feed) {
+        return Object.assign(Object.assign({}, feed), {
+          read: false
+        });
+      });
+    }
+  }, {
+    key: "makeRead",
+    value: function makeRead(id) {
+      var feed = this.feeds.find(function (feed) {
+        return feed.id === id;
+      });
+
+      if (feed) {
+        feed.read = true;
+      }
+    }
+  }]);
+
+  return Store;
+}();
+
+exports.Store = Store;
+},{}],"src/app.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -580,23 +710,21 @@ var router_1 = __importDefault(require("./core/router"));
 
 var page_1 = require("./page");
 
-var store = {
-  currentPage: 1,
-  feeds: []
-};
-window.store = store;
+var store_1 = require("./store");
+
+var store = new store_1.Store();
 var router = new router_1.default();
-var newsFeedView = new page_1.NewsFeedView('root');
-var newsDetailView = new page_1.NewsDetailView('root');
+var newsFeedView = new page_1.NewsFeedView('root', store);
+var newsDetailView = new page_1.NewsDetailView('root', store);
 router.setDefaultPage(newsFeedView);
-router.addRoutePath('/page/', newsFeedView);
-router.addRoutePath('/show/', newsDetailView);
-router.route();
+router.addRoutePath('/page/', newsFeedView, /page\/(\d+)/);
+router.addRoutePath('/show/', newsDetailView, /show\/(\d+)/);
+router.go();
 /*
   반복되거나 중복되는 코드는 개선하자(리팩토링 중요)
   복잡도가 높은 코드는 지양하자
 */
-},{"./core/router":"src/core/router.ts","./page":"src/page/index.ts"}],"../../Users/vitbo/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./core/router":"src/core/router.ts","./page":"src/page/index.ts","./store":"src/store.ts"}],"../../Users/vitbo/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -624,7 +752,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56188" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59948" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
