@@ -1,0 +1,13 @@
+{
+  // 컴파일 과정 JS -> TS
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES5",
+    "module": "CommonJS",
+    "alwaysStrict": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "sourceMap": true,
+    "downlevelIteration": true
+  }
+}

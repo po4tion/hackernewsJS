@@ -1,16 +1,45 @@
+type Store = {
+  currentPage: number;
+  feeds: NewsFeed[];
+};
+
+type News = {
+  id: number;
+  time_ago: string;
+  title: string;
+  url: string;
+  user: string;
+  content: string;
+};
+
+type NewsFeed = News & {
+  comments_count: number;
+  points: number;
+  read?: boolean;
+};
+
+type NewsDetail = News & {
+  comments: NewsComment[];
+};
+
+type NewsComment = News & {
+  comments: NewsComment[];
+  level: number;
+};
+
 // DOM API를 이용
-const container = document.getElementById('root');
+const container: HTMLElement | null = document.getElementById('root');
 // AJAX(Asynchronous Javascript And Xml) code
-const ajax = new XMLHttpRequest();
+const ajax: XMLHttpRequest = new XMLHttpRequest();
 const content = document.createElement('div');
 const NEWS_URL = 'https://api.hnpwa.com/v0/news/1.json';
 const CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json';
-const store = {
+const store: Store = {
   currentPage: 1,
   feeds: [],
 };
 
-function getData(url) {
+function getData<AjaxResponse>(url: string): AjaxResponse {
   // boolean 타입의 false 값은 동기적으로 처리하겠다는 의미
   ajax.open('GET', url, false);
   ajax.send();
@@ -19,7 +48,7 @@ function getData(url) {
   return JSON.parse(ajax.response);
 }
 
-function makeFeeds(feeds) {
+function makeFeeds(feeds: NewsFeed[]): NewsFeed[] {
   for (let i = 0; i < feeds.length; i++) {
     feeds[i].read = false;
   }
@@ -27,8 +56,13 @@ function makeFeeds(feeds) {
   return feeds;
 }
 
-function newsFeed() {
-  let newsFeed = store.feeds;
+function updateView(html: string): void {
+  if (container !== null) container.innerHTML = html;
+  else console.error('최상위 컨테이너가 없어 UI를 진행하지 못합니다.');
+}
+
+function newsFeed(): void {
+  let newsFeed: NewsFeed[] = store.feeds;
   const newsList = [];
 
   let template = `
@@ -57,7 +91,7 @@ function newsFeed() {
   `;
 
   if (newsFeed.length === 0) {
-    newsFeed = store.feeds = makeFeeds(getData(NEWS_URL));
+    newsFeed = store.feeds = makeFeeds(getData<NewsFeed[]>(NEWS_URL));
   }
 
   for (let i = (store.currentPage - 1) * 10; i < store.currentPage * 10; i++) {
@@ -89,19 +123,19 @@ function newsFeed() {
   template = template.replace('{{__news_feed__}}', newsList.join(''));
   template = template.replace(
     '{{__prev_page__}}',
-    store.currentPage > 1 ? store.currentPage - 1 : 1
+    String(store.currentPage > 1 ? store.currentPage - 1 : 1)
   );
   template = template.replace(
     '{{__next_page__}}',
-    store.currentPage < 3 ? store.currentPage + 1 : 3
+    String(store.currentPage < 3 ? store.currentPage + 1 : 3)
   );
 
-  container.innerHTML = template;
+  updateView(template);
 }
 
-function newsDetail() {
+function newsDetail(): void {
   const id = location.hash.substr(7);
-  const newsContent = getData(CONTENT_URL.replace('@id', id));
+  const newsContent = getData<NewsDetail>(CONTENT_URL.replace('@id', id));
   let template = `
   <div class="bg-gray-600 min-h-screen pb-8">
     <div class="bg-white text-xl">
@@ -138,32 +172,32 @@ function newsDetail() {
     }
   }
 
-  function makeComment(comments, called = 0) {
-    const commentString = [];
+  updateView(
+    template.replace('{{__comments__}}', makeComment(newsContent.comments))
+  );
+}
 
-    for (let i = 0; i < comments.length; i++) {
-      commentString.push(`
-        <div style="padding-left: ${called * 40}px;" class="mt-4">
-          <div class="text-gray-400">
-            <i class="fa fa-sort-up mr-2"></i>
-            <strong>${comments[i].user}</strong> ${comments[i].time_ago}
-          </div>
-          <p class="text-gray-700">${comments[i].content}</p>
-        </div>  
-      `);
+function makeComment(comments: NewsComment[]): string {
+  const commentString = [];
 
-      if (comments[i].comments.length > 0) {
-        commentString.push(makeComment(comments[i].comments, called + 1));
-      }
+  for (let i = 0; i < comments.length; i++) {
+    const comment: NewsComment = comments[i];
+    commentString.push(`
+      <div style="padding-left: ${comment.level * 40}px;" class="mt-4">
+        <div class="text-gray-400">
+          <i class="fa fa-sort-up mr-2"></i>
+          <strong>${comment.user}</strong> ${comment.time_ago}
+        </div>
+        <p class="text-gray-700">${comment.content}</p>
+      </div>  
+    `);
+
+    if (comment.comments.length > 0) {
+      commentString.push(makeComment(comment.comments));
     }
-
-    return commentString.join('');
   }
 
-  container.innerHTML = template.replace(
-    '{{__comments__}}',
-    makeComment(newsContent.comments)
-  );
+  return commentString.join('');
 }
 
 // hashchange를 사용하기 위해서는 a.href의 값 맨 앞에 #가 있어야 한다
@@ -174,7 +208,7 @@ window.addEventListener('hashchange', router);
   복잡도가 높은 코드는 지양하자
 */
 
-function router() {
+function router(): void {
   const routePath = location.hash;
 
   // location.hash에 #만 들어왔을 경우 빈 문자열로 인식한다
